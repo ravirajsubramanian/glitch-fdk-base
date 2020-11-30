@@ -1,7 +1,7 @@
 'use strict';
 
-const PRODUCTS_URL = 'http://localhost:10001/get_products';
-const IFRAME_API_URL = 'http://localhost:10001/iframe/api';
+const PRODUCTS_URL = 'http://localhost:3000/get_products';
+const IFRAME_API_URL = 'http://localhost:3000/iframe/api';
 let productsMap, products;
 
 /**

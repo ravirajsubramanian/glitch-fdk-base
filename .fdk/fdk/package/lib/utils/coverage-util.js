@@ -33,7 +33,7 @@ const wrapper = `
             return;
           }
 
-          fetch('http://localhost:10001/iframe/coverage', {
+          fetch('http://localhost:3000/iframe/coverage', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'

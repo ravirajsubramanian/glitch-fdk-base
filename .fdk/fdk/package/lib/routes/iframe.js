@@ -22,7 +22,7 @@ const staticMiddleware = express.static('./app');
 
 const WSS_SCRIPT = `
   <script>
-    var ws = new WebSocket('ws://localhost:10001/notify-change');
+    var ws = new WebSocket('ws://localhost:3000/notify-change');
     ws.onmessage = function() {
       location.reload();
     };
@@ -40,7 +40,7 @@ function constructV2Response(req) {
 
   function convertURLs(locations, oauth) {
     _.forEach(locations, (value) => {
-      value.url = 'http://localhost:10001/iframe/' + (oauth || value.url);
+      value.url = 'http://localhost:3000/iframe/' + (oauth || value.url);
     });
   }
 

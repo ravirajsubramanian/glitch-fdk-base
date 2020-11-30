@@ -33,12 +33,12 @@ function displayPayload(name, type) {
   var url;
 
   if (type === 'actions') {
-    url = `http://localhost:10001/web/actions/${name}`;
+    url = `http://localhost:3000/web/actions/${name}`;
   }
   else {
     const product = jQuery('#product-sel').text().toLowerCase().replace(' ', '_');
 
-    url = `http://localhost:10001/web/events/${name}`;
+    url = `http://localhost:3000/web/events/${name}`;
 
     if (product && !product.includes('select_product')) {
       url = `${url}?product=${product}`;
@@ -144,7 +144,7 @@ function processRequest(url, payload, callback) {
 }
 
 function runAction(action) {
-  var url = 'http://localhost:10001/web/actions/' + action;
+  var url = 'http://localhost:3000/web/actions/' + action;
   var data = monaco.editor.getModel(modelURI).getValue();
 
   processRequest(url, data, function (err, actiondata, xhr) {
@@ -154,7 +154,7 @@ function runAction(action) {
 
     var options = {
       method: 'POST',
-      url: 'http://localhost:10001/dprouter',
+      url: 'http://localhost:3000/dprouter',
       headers: {
         'content-type': 'application/json',
         'mkp-route': 'smi'
@@ -171,7 +171,7 @@ function runAction(action) {
         return showError(xhr);
       }
 
-      url = 'http://localhost:10001/web/validateAction/' + action;
+      url = 'http://localhost:3000/web/validateAction/' + action;
       data = JSON.stringify(actiondata.response);
 
       processRequest(url, data, function (err, data, xhr) {
@@ -192,7 +192,7 @@ function runAction(action) {
 function runEvent(event, product) {
   var url = null;
 
-  url = `http://localhost:10001/web/events/${event}`;
+  url = `http://localhost:3000/web/events/${event}`;
 
   if (product && !product.includes('select_product')) {
     url = `${url}?product=${product}`;
@@ -202,7 +202,7 @@ function runEvent(event, product) {
 
   processRequest(url, data, function (err) {
     if (!err) {
-      var eventUrl = `http://localhost:10001/event/execute?name=${event}`;
+      var eventUrl = `http://localhost:3000/event/execute?name=${event}`;
 
       if (product && !product.includes('select_product')) {
         eventUrl = `${eventUrl}&product=${product}`;
@@ -225,7 +225,7 @@ function runEvent(event, product) {
 
 $(document).ready(function () {
   ajaxRequest({
-    url: 'http://localhost:10001/iframe/api',
+    url: 'http://localhost:3000/iframe/api',
     method: 'GET',
     timeout: eventListTimeout,
     headers: { 'Content-Type': 'application/json' }
@@ -293,7 +293,7 @@ jQuery('#product-sel').on('click', function () {
   jQuery('#editor-btns').hide();
   if (jQuery('#product-dropdown li').length === 0) {
     ajaxRequest({
-      url: 'http://localhost:10001/iframe/api',
+      url: 'http://localhost:3000/iframe/api',
       method: 'GET',
       timeout: eventListTimeout,
       headers: { 'Content-Type': 'application/json' }
@@ -321,18 +321,18 @@ function enableOauth(product) {
   var queryString = product ? `?product=${product}` : '';
 
   jQuery.ajax({
-    url: 'http://localhost:10001/iframe/api',
+    url: 'http://localhost:3000/iframe/api',
     method: 'get'
   }).done(function (data) {
     products = data.product;
     if (data.features.indexOf('oauth') !== -1) {
       jQuery.ajax({
-        url: `http://localhost:10001/accesstoken${queryString}`,
+        url: `http://localhost:3000/accesstoken${queryString}`,
         method: 'get'
       })
         .fail(function () {
           jQuery('#event-area').addClass('area-disable');
-          jQuery('#info-banner').html(`This app uses OAuth. <a href="http://localhost:10001/auth/index?callback=http://localhost:10001/web/test${queryString}">Click here to authorize.</a>`);
+          jQuery('#info-banner').html(`This app uses OAuth. <a href="http://localhost:3000/auth/index?callback=http://localhost:3000/web/test${queryString}">Click here to authorize.</a>`);
         });
     }
   });
@@ -357,7 +357,7 @@ function omniEventListing() {
     const product = jQuery('#product-sel').text().toLowerCase().replace(' ', '_');
 
     ajaxRequest({
-      url: `http://localhost:10001/web/eventsList?product=${product}`,
+      url: `http://localhost:3000/web/eventsList?product=${product}`,
       method: 'GET',
       timeout: eventListTimeout,
       headers: { 'Content-Type': 'application/json' }
@@ -379,7 +379,7 @@ function omniEventListing() {
 function regularEventListing() {
   if (jQuery('#event-dropdown li').length === 0) {
     ajaxRequest({
-      url: 'http://localhost:10001/web/eventsList',
+      url: 'http://localhost:3000/web/eventsList',
       method: 'GET',
       timeout: eventListTimeout,
       headers: { 'Content-Type': 'application/json' }
@@ -410,7 +410,7 @@ jQuery('#event-sel').on('click', function () {
 jQuery('#actions-sel').on('click', function () {
   if (jQuery('#actions-dropdown li').length === 0) {
     ajaxRequest({
-      url: 'http://localhost:10001/web/actions',
+      url: 'http://localhost:3000/web/actions',
       method: 'GET',
       timeout: eventListTimeout,
       headers: { 'Content-Type': 'application/json' }
@@ -483,12 +483,12 @@ jQuery('#reset-event').on('click', function () {
   if (type === 'actions') {
     var action = jQuery('#actions-sel').text();
 
-    url = `http://localhost:10001/web/actions/reset/${action}`;
+    url = `http://localhost:3000/web/actions/reset/${action}`;
   }
   else {
     var event = jQuery('#event-sel').text();
 
-    url = `http://localhost:10001/web/events/reset/${event}`;
+    url = `http://localhost:3000/web/events/reset/${event}`;
 
     if (product && !product.includes('select_product')) {
       url = `${url}?product=${product}`;
@@ -506,7 +506,7 @@ jQuery('#reset-event').on('click', function () {
 
 
 jQuery.ajax({
-  url: 'http://localhost:10001/iframe/api',
+  url: 'http://localhost:3000/iframe/api',
   method: 'get'
 }).done(function (data) {
   products = data.product;

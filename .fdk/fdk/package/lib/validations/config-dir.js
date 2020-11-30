@@ -40,7 +40,7 @@ module.exports = {
       if (configFiles.includes(IPARAM_TEST_DATA)) {
         errMsgs.push({
           severity: WARNING,
-          value: 'iparam_test_data.json is deprecated, to test the installation page, visit - http://localhost:10001/custom_configs'
+          value: 'iparam_test_data.json is deprecated, to test the installation page, visit - http://localhost:3000/custom_configs'
         });
       }
     }

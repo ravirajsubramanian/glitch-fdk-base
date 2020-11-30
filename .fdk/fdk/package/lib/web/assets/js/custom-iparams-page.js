@@ -1,10 +1,10 @@
 'use strict';
 
-const FORM_URL = 'http://localhost:10001/custom_configs/form';
-const FETCH_CONFIGS_URL = 'http://localhost:10001/custom_configs/fetch';
-const STORE_CONFIGS_URL = 'http://localhost:10001/custom_configs/store';
-const IFRAME_API_URL = 'http://localhost:10001/iframe/api';
-const PRODUCTS_URL = 'http://localhost:10001/get_products';
+const FORM_URL = 'http://localhost:3000/custom_configs/form';
+const FETCH_CONFIGS_URL = 'http://localhost:3000/custom_configs/fetch';
+const STORE_CONFIGS_URL = 'http://localhost:3000/custom_configs/store';
+const IFRAME_API_URL = 'http://localhost:3000/iframe/api';
+const PRODUCTS_URL = 'http://localhost:3000/get_products';
 const STORE_FAILRUE = 'Failed to store installation parameters.';
 const STORE_SUCCESS = 'App installation parameters have been successfully stored. You can now proceed to test the app.';
 const FETCH_FAILURE = 'Failed to fetch installation parameters.';
@@ -115,7 +115,7 @@ function bindActions() {
 
   jQuery('#backBtnId').click(function () {
     // if the custom_configs will always redirect to product switcher if it is omni app.
-    window.location.href = 'http://localhost:10001/custom_configs';
+    window.location.href = 'http://localhost:3000/custom_configs';
   });
 }
 

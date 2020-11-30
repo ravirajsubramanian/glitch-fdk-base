@@ -14,7 +14,7 @@ const SUCCESS_STATUS = [
   httpUtil.status.created
 ];
 
-const DPROUTER_URL = 'http://localhost:10001/dprouter';
+const DPROUTER_URL = 'http://localhost:3000/dprouter';
 const POST = 'post';
 
 /**
