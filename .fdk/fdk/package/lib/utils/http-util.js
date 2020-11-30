@@ -26,6 +26,7 @@ module.exports = {
     // 2xx
     ok: 200,
     created: 201,
+    no_content: 204,
     information_error: 210,
 
     // 3xx

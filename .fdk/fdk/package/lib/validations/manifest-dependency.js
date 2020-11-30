@@ -33,6 +33,8 @@ function validateDependencies() {
 }
 
 module.exports = {
+  name: 'manifest-dependency',
+
   validate() {
     const errMsgs = [];
     const dependencyErr = validateDependencies();
@@ -48,6 +50,8 @@ module.exports = {
     }
     return _.flattenDeep(errMsgs);
   },
-  validateDependencies : validateDependencies,
-  validationType: [validationConst.PRE_PKG_VALIDATION]
+
+  validateDependencies,
+
+  validationType: [ validationConst.PRE_PKG_VALIDATION ]
 };

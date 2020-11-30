@@ -5,7 +5,7 @@ const debuglog = __debug.bind(null, __filename);
 const fileUtil = require('../utils/file-util');
 const manifest = require('../manifest');
 const actionsUtil = require('../utils/actions-util');
-const validateRequest = require('../validations/schema-validation');
+const validateRequest = require('../validations/schema.js');
 const _ = require('lodash');
 
 const Router = require('express').Router;

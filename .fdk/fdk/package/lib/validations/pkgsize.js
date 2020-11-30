@@ -9,6 +9,8 @@ const validationConst = require('./constants').validationContants;
 const MAX_PKG_SIZE = 5000000;
 
 module.exports = {
+  name: 'pkgsize',
+
   validate() {
     const errMsgs = [];
     const plgDir = `${process.cwd()}/dist/${nsUtil.getRootFolder()}${nsUtil.pkgExt}`;
@@ -22,5 +24,5 @@ module.exports = {
     return errMsgs;
   },
 
-  validationType: [validationConst.POST_PKG_VALIDATION]
+  validationType: [ validationConst.POST_PKG_VALIDATION ]
 };

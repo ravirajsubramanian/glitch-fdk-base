@@ -136,6 +136,8 @@ function isBackendApp() {
 }
 
 module.exports = {
+  name: 'actions',
+
   validate() {
     let errMsgs = [];
 
@@ -161,5 +163,6 @@ module.exports = {
       return [`Exception occured while validation: ${e.message}`];
     }
   },
-  validationType: [validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION]
+
+  validationType: [ validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION ]
 };

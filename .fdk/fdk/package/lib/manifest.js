@@ -10,6 +10,7 @@ const manifestFile = './manifest.json';
 const serverFile = './server/server.js';
 const oauthFile = './config/oauth_config.json';
 const actionsFile = './actions.json';
+const entitiesFile = './config/entities.json';
 
 const charset = 'utf8';
 
@@ -90,11 +91,29 @@ function getActions(raw = false) {
 
   return [];
 }
+
+function getEntities() {
+  let entities = {};
+
+  if (fs.existsSync(entitiesFile)) {
+    try {
+      entities = JSON.parse(fileUtil.readFile(entitiesFile, 'utf8'));
+    }
+    catch (err) {
+      debuglog(`Error while parsing entities file ${err.message}`);
+      console.log('Error while parsing entities file', err);
+
+      return process.exit(1);
+    }
+  }
+
+  return entities;
+}
+
 /*
   reload function to update the manifest details to the module.
   usage: require("manifest").reload() will update the details.
 */
-
 function reload() {
   let doc;
 
@@ -121,6 +140,7 @@ function reload() {
   module.exports.devDependencies = doc.devDependencies || {};
   module.exports.features = inferFeatures(doc);
   module.exports.actions = getActions();
+  module.exports.entities = getEntities();
 }
 
 module.exports = {
@@ -131,6 +151,7 @@ module.exports = {
   features: null,
   dependencies: null,
   actions: null,
+  entities: getEntities(),
   getActions
 };
 

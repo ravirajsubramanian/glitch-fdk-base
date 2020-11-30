@@ -32,6 +32,7 @@ const validator = require('./validate');
 const validationConst = require('../validations/constants').validationContants;
 const watcher = require('../watcher');
 const configUtil = require('../utils/config-util');
+const coUtil = require('../utils/custom-objects');
 
 const app = express();
 const expressWs = ws(app);
@@ -53,6 +54,14 @@ const CONFIG_ASSETS = '/custom_configs/assets';
 
 global.PLATFORM_SOURCE = 'PLATFORM';
 global.APP_SOURCE = 'APP';
+
+function listenOn(app, port) {
+  return new Promise((resolve, reject) => {
+    const server = app.listen(port)
+      .once('listening', () => resolve(server))
+      .once('error', reject);
+  });
+}
 
 async function createTunnel(authToken) {
   try {
@@ -86,9 +95,20 @@ function logServerStartMsg() {
   }
 }
 
+function setupLifeCycle(forceResyncEntities) {
+  return coUtil.syncEntities(forceResyncEntities);
+}
+
 module.exports = {
-  run: (clearCoverage, skipCoverage, skipValidation, enableTunnel, authToken) => {
-    const validationMessages = validator.run(validationConst.RUN_VALIDATION, skipValidation);
+  async run(
+    clearCoverage,
+    skipCoverage,
+    skipValidation,
+    enableTunnel,
+    authToken,
+    forceResyncEntities
+  ) {
+    const validationMessages = await validator.run(validationConst.RUN_VALIDATION, skipValidation);
 
     eh.printError('The local server could not be started due to the following issue(s):', validationMessages);
 
@@ -102,7 +122,7 @@ module.exports = {
       coverageUtil.snooze();
     }
 
-    if (authToken &&!enableTunnel){
+    if (authToken && !enableTunnel){
       console.error('WARNING: Please pass --tunnel flag to enable tunnel. Only auth token has been passed');
     }
 
@@ -175,7 +195,9 @@ module.exports = {
     app.use(actionsRouter);
 
     // Finally, listen:
-    const server = app.listen(HTTP_PORT, async () => {
+    const server = await listenOn(app, HTTP_PORT);
+
+    try {
       if (manifest.features.includes('backend')) {
         await dependencyInstaller.run(manifest.dependencies);
       }
@@ -184,8 +206,14 @@ module.exports = {
         await createTunnel(authToken);
       }
 
+      await setupLifeCycle(forceResyncEntities);
+
       logServerStartMsg();
-    });
+    }
+    catch (error) {
+      console.error(JSON.stringify(error.errors));
+      process.exit(1);
+    }
 
     process.on('SIGINT', async () => {
       if (enableTunnel) {

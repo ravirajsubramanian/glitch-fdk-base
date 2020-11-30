@@ -9,6 +9,8 @@ const fileUtil = require('../utils/file-util');
 const MAX_INDVL_ASSET_SIZE = 2000000;
 
 module.exports = {
+  name: 'app-dir',
+
   validate(appType) {
     const errMsgs = [];
     const appFolderPath = `${process.cwd()}/app/`;
@@ -37,5 +39,5 @@ module.exports = {
     return errMsgs;
   },
 
-  validationType: [validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION]
+  validationType: [ validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION ]
 };

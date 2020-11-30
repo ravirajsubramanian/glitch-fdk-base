@@ -11,7 +11,6 @@ const os = require('os');
 const errorHandler = require('../utils/error-util');
 const util = require('../utils/helper-util');
 const productInfo = require('../utils/product-info-util');
-const writeMetric = require('../utils/metric-util');
 const addonVersion = productInfo.getAddonVersion();
 const TEMPLATE_ORDER = require(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/template_info.json`).template_order;
 const SERVERLESS_APPS = require(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/template_info.json`).serverless_apps;
@@ -35,15 +34,9 @@ const ignoreFiles = ['.fdk', '.report.json'];
 function initTemplate(product, template, prjDir){
   debuglog(`Initializing template "${template}" with product "${product}".`);
 
-  //recording template/product and os details
-  writeMetric.store('template', {'timestamp': `${Date.now()}`, 'value': template });
-  writeMetric.store('product', {'timestamp': `${Date.now()}`, 'value' : product});
-  writeMetric.store('os', {'timestamp': `${Date.now()}`, 'version': `${os.platform()}`, 'architecure': `${os.arch()}`, 'type': `${os.type()}`});
-
   fs.copySync(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/${product}/${template}`, prjDir);
 
   if (SERVERLESS_APPS[product].includes(template)) {
-    writeMetric.store('app', {'timestamp': `${Date.now()}`, 'value': 'backend' });
     if (product === OMNI_PRODUCT) {
       const manifest = fs.readJsonSync(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/${product}/${template}/manifest.json`);
 

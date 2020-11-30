@@ -85,6 +85,8 @@ function validateOauthIparams(oauthConfig) {
 }
 
 module.exports = {
+  name: 'oauth',
+
   validate() {
     const errMsgs = [];
     let oauthConfig;
@@ -109,5 +111,5 @@ module.exports = {
     return _.flattenDeep(errMsgs);
   },
 
-  validationType: [validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION]
+  validationType: [ validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION ]
 };

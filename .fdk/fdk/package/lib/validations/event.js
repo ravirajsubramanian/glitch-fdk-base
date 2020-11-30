@@ -80,6 +80,8 @@ function isBackendApp() {
 }
 
 module.exports = {
+  name: 'event',
+
   validate() {
     try {
       let errMsgs = [];
@@ -97,5 +99,5 @@ module.exports = {
     }
   },
 
-  validationType: [validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION]
+  validationType: [ validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION ]
 };

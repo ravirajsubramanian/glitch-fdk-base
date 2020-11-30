@@ -1,24 +1,24 @@
 {
-  "_from": "https://dl.freshdev.io/cli/fdk-6.8.0.tgz",
-  "_id": "fdk@6.8.0",
+  "_from": "https://dl.freshdev.io/cli/fdk-6.9.0.tgz",
+  "_id": "fdk@6.9.0",
   "_inBundle": false,
-  "_integrity": "sha512-ah1wvv9xnR58MwmqTyrjSvzqSczJdoWf0R28G2K3BrDUzN7QQR1YzwxTtiTC+5yvddeqXQDU/pVB/96it282UA==",
+  "_integrity": "sha512-7H3fYBoxQxbjr30MlH9jgnra0EOmpvnBbMZdGMTcBX0Poul81KxMWsKa5QcVJqahGfW7iEKeRJBjKKhPG2Ag/A==",
   "_location": "/fdk",
   "_phantomChildren": {},
   "_requested": {
     "type": "remote",
-    "raw": "https://dl.freshdev.io/cli/fdk-6.8.0.tgz",
-    "rawSpec": "https://dl.freshdev.io/cli/fdk-6.8.0.tgz",
-    "saveSpec": "https://dl.freshdev.io/cli/fdk-6.8.0.tgz",
-    "fetchSpec": "https://dl.freshdev.io/cli/fdk-6.8.0.tgz"
+    "raw": "https://dl.freshdev.io/cli/fdk-6.9.0.tgz",
+    "rawSpec": "https://dl.freshdev.io/cli/fdk-6.9.0.tgz",
+    "saveSpec": "https://dl.freshdev.io/cli/fdk-6.9.0.tgz",
+    "fetchSpec": "https://dl.freshdev.io/cli/fdk-6.9.0.tgz"
   },
   "_requiredBy": [
     "#USER"
   ],
-  "_resolved": "https://dl.freshdev.io/cli/fdk-6.8.0.tgz",
-  "_shasum": "a8f003ea47a5312f455e5571209874e2964fec9c",
-  "_spec": "https://dl.freshdev.io/cli/fdk-6.8.0.tgz",
-  "_where": "/Users/ravirajsu/Documents/freshworks/code/projects/test/fd-test",
+  "_resolved": "https://dl.freshdev.io/cli/fdk-6.9.0.tgz",
+  "_shasum": "c8f83956c17c89fdc24503717a27b3b9444767e5",
+  "_spec": "https://dl.freshdev.io/cli/fdk-6.9.0.tgz",
+  "_where": "/Users/ravirajsu",
   "author": {
     "name": "Freshworks Inc"
   },
@@ -37,6 +37,7 @@
   "dependencies": {
     "adm-zip": "^0.4.11",
     "ajv": "4.11.8",
+    "ajv-keywords": "^3.5.2",
     "archiver": "^1.0.0",
     "async": "^2.1.4",
     "body-parser": "^1.15.0",
@@ -65,8 +66,12 @@
     "passport-oauth2-refresh": "^1.0.0",
     "request": "2.88.0",
     "requestretry": "^4.0.2",
+    "sequelize": "^6.3.5",
+    "sequelize-cli": "^6.2.0",
     "sinon": "6.3.5",
+    "sqlite3": "^5.0.0",
     "sync-request": "5.0.0",
+    "umzug": "^2.3.0",
     "uuid": "^3.1.0",
     "validator": "^9.0.0",
     "wiz-cliparse": "^0.5.4"
@@ -110,7 +115,8 @@
       "global-require": 0,
       "complexity": 0,
       "max-nested-callbacks": 0,
-      "init-declarations": 0
+      "init-declarations": 0,
+      "new-cap": "off"
     },
     "overrides": {
       "files": [
@@ -173,7 +179,7 @@
     "precommit": "yarn install && yarn code-sanity && yarn test && yarn remote-parity",
     "remote-parity": "git fetch && [ \"$(git rev-parse HEAD)\" == \"$(git rev-parse @{u})\" ]",
     "test": "yarn unit-tests",
-    "unit-tests": "NODE_ENV=test nyc mocha --exit -t 15000 ./test/*.js"
+    "unit-tests": "NODE_ENV=test nyc mocha --file ./test/utils/init.js --exit -t 15000 ./test/*.js"
   },
-  "version": "6.8.0"
+  "version": "6.9.0"
 }

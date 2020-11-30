@@ -10,7 +10,7 @@ const manifest = require('../manifest');
 const validationConst = require('./constants').validationContants;
 const customLintRules = require('./custom-lint-rules');
 const lintUtil = require('../utils/lint-util');
-const reportUtil = require('../utils/metric-util').report;
+const reportUtil = require('../utils/report-util');
 
 const ALLOWED_EXTNS = [ '.js' ];
 const BACKEND_DIRS = [ './server' ];
@@ -72,6 +72,8 @@ function lint(files, fix) {
 }
 
 module.exports = {
+  name: 'lint',
+
   validate(appType, fix) {
     let FILES = [];
 
@@ -89,5 +91,6 @@ module.exports = {
 
     return lint(FILES, fix);
   },
-  validationType: [validationConst.PRE_PKG_VALIDATION]
+
+  validationType: [ validationConst.PRE_PKG_VALIDATION ]
 };

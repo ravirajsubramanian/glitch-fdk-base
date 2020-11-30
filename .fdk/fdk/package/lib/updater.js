@@ -12,7 +12,6 @@ const request = require('request');
 const DataStore = require('./utils/data-util').DataStore;
 const helper = require('./utils/helper-util');
 const packageJSON = require('../package.json');
-const writeMetric = require('./utils/metric-util');
 
 const dbApi = new DataStore({
   location: `${os.homedir()}/.fdk/`
@@ -33,10 +32,6 @@ function checkForUpdate(returnControlToIndex) {
         Fetch local version information from fdk store
       */
       localInfo = dbApi.fetch('version_details');
-
-      if (writeMetric.fetch('version') === undefined) {
-        writeMetric.store('version', {'fdk_version': `${packageJSON.version}`});
-      }
 
       // Disabled force check for now
 

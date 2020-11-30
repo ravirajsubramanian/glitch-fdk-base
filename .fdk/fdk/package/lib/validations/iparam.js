@@ -496,6 +496,8 @@ function checkSecure() {
 }
 
 module.exports = {
+  name: 'iparam',
+
   validate() {
     try {
       const configFolderPath = `${process.cwd()}/config/`;
@@ -528,5 +530,5 @@ module.exports = {
     }
   },
 
-  validationType: [validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION]
+  validationType: [ validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION ]
 };

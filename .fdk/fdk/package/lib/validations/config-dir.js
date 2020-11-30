@@ -10,13 +10,16 @@ const validFileFolders = [
   'iparams.json',
   'iparam_test_data.json',
   'oauth_config.json',
-  'assets'
+  'assets',
+  'entities.json'
 ];
 
 const IPARAM_TEST_DATA = 'iparam_test_data.json';
 const WARNING = 1;
 
 module.exports = {
+  name: 'config-dir',
+
   validate() {
     const errMsgs = [];
     const configFolderPath = `${process.cwd()}/config/`;
@@ -45,5 +48,5 @@ module.exports = {
     return errMsgs;
   },
 
-  validationType: [validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION]
+  validationType: [ validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION ]
 };

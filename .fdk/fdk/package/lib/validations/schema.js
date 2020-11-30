@@ -103,6 +103,8 @@ function fetchResponseSchema(actionName) {
 }
 
 module.exports = {
+  name: 'schema',
+
   validate() {
     let errMsgs = '';
 
@@ -145,5 +147,5 @@ module.exports = {
     }
   },
 
-  validationType: [validationConst.RUN_VALIDATION]
+  validationType: [ validationConst.RUN_VALIDATION ]
 };

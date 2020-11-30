@@ -138,6 +138,8 @@ function validateLocation(appType) {
 }
 
 module.exports = {
+  name: 'manifest',
+
   validate(appType) {
     const errMsgs = [];
     const productErr = validateProduct();
@@ -168,5 +170,5 @@ module.exports = {
     return _.flattenDeep(errMsgs);
   },
 
-  validationType: [validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION]
+  validationType: [ validationConst.PRE_PKG_VALIDATION, validationConst.RUN_VALIDATION ]
 };
