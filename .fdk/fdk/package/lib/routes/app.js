@@ -12,7 +12,7 @@ const nsUtil = fileUtil.nsresolver;
 
 const Router = require(`${global.FDK_PATH}/node_modules/express`).Router;
 const appsRouter = new Router();
-const LOCAL_URL = 'http://localhost:10001';
+const LOCAL_URL = 'http://localhost:3000';
 let oauthStatus = 'notstarted';
 
 const getProductKey = (product) => nsUtil.getInternalNamespace('product_name', { product });

@@ -19,7 +19,7 @@ const charset = 'utf8';
 const STRATEGY = 'oauth2';
 const BLANK_STATE = 'State is blank';
 const INVALID_STATE = 'Invalid state';
-const OAUTH_CALLBACK = 'http://localhost:10001/auth/callback';
+const OAUTH_CALLBACK = 'http://localhost:3000/auth/callback';
 const REFRESH_FAILURE_STATUS = 210;
 
 let cachedOAuthConfig = null;

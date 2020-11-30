@@ -70,7 +70,7 @@ function customIParamsPage(req, res) {
 
   if (Object.keys(manifest.product).length > 1 && !product) {
     res.writeHead(httpUtil.status.found, {
-      'Location': 'http://localhost:10001/choose_product?callback=http://localhost:10001/custom_configs'
+      'Location': 'http://localhost:3000/choose_product?callback=http://localhost:3000/custom_configs'
     });
     return res.end();
   }
@@ -80,7 +80,7 @@ function customIParamsPage(req, res) {
     const queryString = product ? `?product=${product}` : '';
 
     res.writeHead(httpUtil.status.found, {
-      'Location': `http://localhost:10001/auth/index?callback=http://localhost:10001/custom_configs${queryString}`
+      'Location': `http://localhost:3000/auth/index?callback=http://localhost:3000/custom_configs${queryString}`
     });
     return res.end();
   }
