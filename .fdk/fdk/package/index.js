@@ -11,7 +11,7 @@ const debuglog = __debug.bind(null, __filename);
 const errorHandler = require('./lib/utils/error-util');
 const fileUtil = require('./lib/utils/file-util');
 const help = require('./lib/cli/help');
-const pjson = require('../package.json');
+const pjson = require('./package.json');
 const updater = require('./lib/updater');
 const suggest = require('./lib/utils/command-util').suggestCommand;
 
