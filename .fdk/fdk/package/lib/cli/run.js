@@ -8,7 +8,6 @@ const ngrok = require('ngrok');
 const fs = require('fs');
 const path = require('path');
 const ws = require('express-ws');
-const basicAuth = require('express-basic-auth');
 const websocket = require('ws');
 
 const _ = require('lodash');
@@ -16,6 +15,7 @@ const _ = require('lodash');
 const appRouter = require('../routes/app');
 const eventsRouter = require('../routes/beevents');
 const dpRouter = require('../routes/data-pipe');
+const productSwitchRouter = require('../routes/productSwitcher');
 const configsRouter = require('../routes/configs');
 const iframeRouter = require('../routes/iframe');
 const oauthRouter = require('../routes/oauth2').oauthRouter;
@@ -34,23 +34,6 @@ const watcher = require('../watcher');
 const configUtil = require('../utils/config-util');
 
 const app = express();
-var cred = {};
-cred[process.env.FW_GLITCH_USER || 'admin'] = process.env.FW_GLITCH_PASSWORD || 'password';
-//Home
-app.get("/",function(req,res){
-	var homeContent = "Check the README.MD";
-	try{
-	  homeContent = fs.readFileSync("/app/index.html");
-	}catch(e){
-	}
-	res.status(200).type('text/html').send(homeContent);
-});
-//Set the basic auth to protect unauthorized access
-if(!process.env.INSEC)
-app.use(basicAuth({
-	users: cred
-}));
-
 const expressWs = ws(app);
 const istanbulBodyParser = bodyParser.json({
   limit: '5MB'
@@ -61,8 +44,8 @@ const exWss = expressWs.getWss('/notify-change');
 const productInfo = require('../utils/product-info-util');
 
 const DOMAIN = productInfo.getTestLink();
-const HTTP_PORT = 3000;
-const WS_CLOSE_TIMEOUT = 400000;
+const HTTP_PORT = 10001;
+const WS_CLOSE_TIMEOUT = 4000;
 
 const CACHED_VIEWS = {};
 
@@ -183,13 +166,14 @@ module.exports = {
 
     app.use(dpRouter);
     app.use(iframeRouter);
+    app.use(productSwitchRouter);
     app.use(configsRouter);
     app.use(eventsRouter);
     app.use(appRouter);
     app.use(webEventsRouter);
     app.use(oauthRouter);
     app.use(actionsRouter);
-    app.use('/coverage', express.static('/app/workspace/coverage'));
+
     // Finally, listen:
     const server = app.listen(HTTP_PORT, async () => {
       if (manifest.features.includes('backend')) {

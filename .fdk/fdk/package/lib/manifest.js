@@ -13,12 +13,23 @@ const actionsFile = './actions.json';
 
 const charset = 'utf8';
 
-function inferFeatures() {
+function inferFeatures(manifest) {
   // Always support `db`...
-  const inferredFeatures = [ 'db' ];
+  const inferredFeatures = ['db'];
 
   if (fs.existsSync(serverFile)) {
     inferredFeatures.push('backend');
+  }
+
+  if (Object.keys(module.exports.product || {}).length > 1) {
+    inferredFeatures.push('omni');
+  }
+
+  const manifestSettings = manifest.settings;
+
+  if (manifestSettings && manifestSettings.iparams &&
+    manifestSettings.iparams.hideStandardButtons) {
+    inferredFeatures.push('iparams_hidden_buttons');
   }
 
   if (fs.existsSync(oauthFile)) {
@@ -26,7 +37,7 @@ function inferFeatures() {
 
     /*eslint-disable */
     try {
-      isAgentLevel = JSON.parse(fs.readFileSync(oauthFile, charset))['token_type']==='agent';
+      isAgentLevel = JSON.parse(fs.readFileSync(oauthFile, charset))['token_type'] === 'agent';
     } catch (err) {
       console.error('OauthFile ERROR ' + err);
       process.exit(1);
@@ -34,13 +45,11 @@ function inferFeatures() {
     /*eslint-enable */
 
 
-    if (isAgentLevel){
+    if (isAgentLevel) {
       inferredFeatures.push('agent_oauth');
-    }
-    else {
+    } else {
       inferredFeatures.push('oauth');
     }
-
   }
 
   debuglog(`Inferred ${inferredFeatures} as features.`);
@@ -53,7 +62,9 @@ function processActions(actions) {
 
   for (var actionName in actions) {
     if (actions.hasOwnProperty(actionName)) {
-      actionsList.push(Object.assign({ 'name' : actionName }, actions[actionName]));
+      actionsList.push(Object.assign({
+        'name': actionName
+      }, actions[actionName]));
     }
   }
   return actionsList;
@@ -69,8 +80,7 @@ function getActions(raw = false) {
         return processActions(loadActions);
       }
       return loadActions;
-    }
-    catch (err) {
+    } catch (err) {
       console.log('Error while parsing actions file', err);
       debuglog(`Error while parsing actions file ${err.message}`);
 
@@ -94,8 +104,7 @@ function reload() {
   }
   try {
     doc = JSON.parse(fs.readFileSync(manifestFile, charset));
-  }
-  catch (e) {
+  } catch (e) {
     debuglog(`Error while parsing manifest file ${e.message}`);
     console.log('Could not parse the app manifest file in the current/specified directory.');
 
@@ -107,10 +116,10 @@ function reload() {
   module.exports.manifest = doc;
   // Easy access to common use properties:
   module.exports.pfVersion = doc['platform-version'];
-  module.exports.features = inferFeatures();
   module.exports.product = doc.product;
   module.exports.dependencies = doc.dependencies || {};
   module.exports.devDependencies = doc.devDependencies || {};
+  module.exports.features = inferFeatures(doc);
   module.exports.actions = getActions();
 }
 

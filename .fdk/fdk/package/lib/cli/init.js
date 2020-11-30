@@ -16,6 +16,7 @@ const addonVersion = productInfo.getAddonVersion();
 const TEMPLATE_ORDER = require(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/template_info.json`).template_order;
 const SERVERLESS_APPS = require(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/template_info.json`).serverless_apps;
 const RE_IGNORED_FILES = util.IGNORED_FILES;
+const OMNI_PRODUCT = 'omni';
 
 function getTemplatesFor(product) {
   return _.intersection(TEMPLATE_ORDER[product], fs.readdirSync(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/${product}`).filter(e => !e.match(RE_IGNORED_FILES)));
@@ -43,7 +44,15 @@ function initTemplate(product, template, prjDir){
 
   if (SERVERLESS_APPS[product].includes(template)) {
     writeMetric.store('app', {'timestamp': `${Date.now()}`, 'value': 'backend' });
-    fs.copySync(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/events/payloads/${product}/`, `${prjDir}/server/test_data`);
+    if (product === OMNI_PRODUCT) {
+      const manifest = fs.readJsonSync(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/template/${product}/${template}/manifest.json`);
+
+      Object.keys(manifest.product).forEach(productName =>
+        fs.copySync(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/events/payloads/${productName}/`, `${prjDir}/server/test_data/${productName}`)
+      );
+    } else {
+      fs.copySync(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/events/payloads/${product}/`, `${prjDir}/server/test_data`);
+    }
   }
   console.log(`A new ${util.capitalize(product)} app was successfully created from template "${template}" with the following files.\n`);
   nodeTree(process.cwd());

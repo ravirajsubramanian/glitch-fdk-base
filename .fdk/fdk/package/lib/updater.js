@@ -93,7 +93,6 @@ function checkForUpdate(returnControlToIndex) {
     */
     function notifyNewVersion(callback) {
       if (helper.isGreaterThan(packageJSON.version, remoteInfo.fdkCli.version)) {
-        callback(null);
         inquirer.prompt({
           type: 'input',
           name: 'toUpdate',
@@ -109,9 +108,9 @@ function checkForUpdate(returnControlToIndex) {
           }
           else if (ans.toUpdate === 'yes') {
             try {
-              // child_process.execSync(remoteInfo.fdkCli.cmd, {
-              //   stdio: [0, 1, 2]
-              // });
+              child_process.execSync(remoteInfo.fdkCli.cmd, {
+                stdio: [0, 1, 2]
+              });
             }
             catch (e) {
               console.log(`Installation failed - ${e.message}`);
