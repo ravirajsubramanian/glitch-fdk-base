@@ -8,6 +8,7 @@ const configUtil = require('../utils/config-util');
 const fileUtil = require('../utils/file-util');
 const validationConst = require('./constants').validationContants;
 const productInfo = require('../utils/product-info-util');
+const manifest = require('../manifest');
 
 const VALID_KEYS = [
   'display_name',
@@ -62,10 +63,19 @@ const SECURE_SUBSETS = [
 const OPTIONS = 'options';
 const DEFAULT_VALUE = 'default_value';
 const TYPE = 'type';
+const CURRENT = 'current';
+const DATA_BIND = 'data-bind';
 const MANDATORY_KEYS = ['display_name', 'type'];
 const HTML_FILE = 'iparams.html';
 const JSON_FILE = 'iparams.json';
+const JS_FILE = 'iparams.js';
 const CONFIG_METHODS = ['getConfigs', 'postConfigs'];
+const CUSTOM_SETTINGS_METHODS = [
+  {
+    method: 'client.iparams.apply',
+    regex: /^[a-zA-Z_]+.iparams.apply/
+  }
+];
 const REGEX = 'regex';
 const REQUIRED = 'required';
 const SECURE = 'secure';
@@ -211,7 +221,7 @@ function checkValidKeys(content) {
     if (!_.includes(TYPES_WITH_OPTIONS, content[key][TYPE])) {
       if (OPTIONS in content[key]) {
         errs.push(
-          `Options must not be specified fo ${content[key][TYPE]} type in the '${key}' field.`
+          `Options must not be specified for ${content[key][TYPE]} type in the '${key}' field.`
         );
       }
     }
@@ -230,10 +240,11 @@ function checkValidKeys(content) {
             `Mandatory key(s) ${missingTypeAttribute} missing in ${TYPE_ATTRIBUTES} for ${key} in ${JSON_FILE}.`
           );
         } else if (content[key][TYPE] === DOMAIN &&
-          !productList.includes(content[key][TYPE_ATTRIBUTES][PRODUCT])) {
-          errs.push(
-            `Invalid product name format '${content[key][TYPE_ATTRIBUTES][PRODUCT]}'. Use lowercase without space`
-          );
+          !productList.includes(content[key][TYPE_ATTRIBUTES][PRODUCT]) &&
+          content[key][TYPE_ATTRIBUTES][PRODUCT] !== CURRENT) {
+              errs.push(
+                `Invalid product name format '${content[key][TYPE_ATTRIBUTES][PRODUCT]}'. Use lowercase without space`
+              );
         } else if (content[key][TYPE] === DOMAIN &&
           content[key][TYPE_ATTRIBUTES][PRODUCT] === FRESHCHAT) {
           errs.push(
@@ -309,10 +320,109 @@ function iparamKeysValidator() {
   return err;
 }
 
-function iparamHTMLValidator() {
+function dataBindValidator() {
+  const err = [];
+  const configs = configUtil.getConfig();
+
+  const productArray = _.keys(manifest.product);
+
+  if (configs) {
+    Object.keys(configs).forEach(function(key) {
+      if (configs[key][DATA_BIND]
+          && (configs[key][TYPE] === DOMAIN || configs[key][TYPE] === API_KEY)) {
+
+        const typeAttributes = configs[key].type_attributes;
+
+        if (productArray.length > 1) {
+          // Omni app databind validation
+          if (typeAttributes.product !== CURRENT) {
+            err.push(
+              'In iparams.json, the type_attributes.product value must be "current", as your app supports multiple products. Please modify it.'
+            );
+          }
+        } else if (typeAttributes.product !== CURRENT &&
+            (typeAttributes.product !== productArray[0])) {
+          // Standalone product validation
+          err.push(
+            `In iparams.json, type_attributes.product is "${typeAttributes.product}". It must be the same as the product name mentioned in manifest.json. Please modify it.`
+          );
+        }
+      }
+    });
+  }
+
+  return err;
+}
+
+function getCustomSettingsMethods(ast) {
+    const customSettingsMethods = [];
+    // Check ExpressionStatement's callee
+    const checkExpressionStatement = (expression) => {
+      const expressionComponents = [];
+      const appendExpressionComponents = (item) => {
+          if (item.type === 'MemberExpression') {
+            if (item.object.type === 'MemberExpression') {
+              appendExpressionComponents(item.object);
+            }
+            if (item.object.type === 'Identifier') {
+              expressionComponents.push(item.object.name);
+            }
+            if (item.property.type === 'Identifier') {
+              expressionComponents.push(item.property.name);
+            }
+        }
+      };
+
+      appendExpressionComponents(expression);
+      const constructedMethod = expressionComponents.join('.');
+
+      for (const { method, regex } of CUSTOM_SETTINGS_METHODS) {
+        if (regex.test(constructedMethod)) {
+          customSettingsMethods.push(method);
+          break;
+        }
+      }
+    };
+
+    // Traverses through entire node AST from esprima
+    const traverse = (node, callback) => {
+      callback(node);
+      for (const key in node) {
+          if (node.hasOwnProperty(key)) {
+              const child = node[key];
+
+              if (typeof child === 'object' && child !== null) {
+                  if (Array.isArray(child)) {
+                      child.forEach(node => traverse(node, callback));
+                  } else {
+                      traverse(child, callback);
+                  }
+              }
+          }
+      }
+    };
+
+    // Traverse through entire node ast and check expression statements
+    traverse(ast, (node) => checkExpressionStatement(node));
+    return customSettingsMethods;
+}
+
+function customSettingsValidator() {
+  const iparamsJs = configUtil.getIparamsJs();
+  const ast = esprima.parse(iparamsJs).body;
+  const customSettingsMethods = getCustomSettingsMethods(ast);
+  const missingMethods = _.difference(CUSTOM_SETTINGS_METHODS.map(({ method }) => method),
+    customSettingsMethods);
+
+  return missingMethods;
+}
+
+function iparamHTMLValidator(hasCustomSettings) {
   const errs = [];
   const $ = cheerio.load(configUtil.getHTMLContent());
+
   let configMethods = [];
+  let customSettingsMethods = [];
 
   $('script[type="text/javascript"], script:not([type])').each(function () {
     const ast = esprima.parse($(this).text()).body;
@@ -323,6 +433,11 @@ function iparamHTMLValidator() {
       return result;
     }, []);
 
+    if (hasCustomSettings) {
+      customSettingsMethods = [...customSettingsMethods,
+         ...getCustomSettingsMethods(ast)];
+    }
+
     configMethods = configMethods.concat(exp);
   });
 
@@ -330,6 +445,30 @@ function iparamHTMLValidator() {
 
   if (missingMethods.length > 0) {
     errs.push(`Mandatory method(s) missing in ${HTML_FILE}: ${missingMethods.toString()}.`);
+  }
+
+  if (hasCustomSettings) {
+    const missingCustomSettingsMethods = _.difference(CUSTOM_SETTINGS_METHODS
+      .map(({ method }) => method), customSettingsMethods);
+
+    if (configUtil.hasIparamsJs()) {
+     const jsError = customSettingsValidator();
+
+      if (missingCustomSettingsMethods.length > 0 && jsError.length > 0) {
+        errs.push(`Mandatory method call(s) missing in ${HTML_FILE}/${JS_FILE} for custom settings: ${missingCustomSettingsMethods.toString()}`);
+
+        return errs;
+      }
+
+      if ((missingCustomSettingsMethods.length === 0 && jsError.length > 0) ||
+          (jsError.length === 0 && missingCustomSettingsMethods.length > 0)) {
+          return errs;
+      }
+    }
+
+    if (missingCustomSettingsMethods.length > 0) {
+      errs.push(`Mandatory method call(s) missing in ${HTML_FILE} for custom settings: ${missingCustomSettingsMethods.toString()}`);
+    }
   }
 
   return errs;
@@ -362,18 +501,21 @@ module.exports = {
       const configFolderPath = `${process.cwd()}/config/`;
       let errMsgs = [];
 
+      const hasCustomSettings = manifest.features.includes('iparams_hidden_buttons');
+
       if (fileUtil.fileExists(configFolderPath)) {
         if (fileUtil.fileExists(`${configFolderPath}${HTML_FILE}`)) {
           if (fileUtil.fileExists(`${configFolderPath}${JSON_FILE}`)) {
             errMsgs.push(`Unsupported File(s). Specify either ${HTML_FILE} or ${JSON_FILE}`);
           }
-          errMsgs.push(iparamHTMLValidator());
+          errMsgs.push(iparamHTMLValidator(hasCustomSettings));
         } else if (!fileUtil.fileExists(`${configFolderPath}${JSON_FILE}`)) {
           errMsgs.push('iparams.json is mandatory.');
         } else {
           errMsgs.push(iparamKeysValidator());
           errMsgs.push(optionsValidator());
           errMsgs.push(checkSecure());
+          errMsgs.push(dataBindValidator());
         }
       } else {
         errMsgs.push('Mandatory folder(s) missing: config');

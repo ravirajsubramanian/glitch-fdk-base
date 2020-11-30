@@ -14,7 +14,7 @@ const addonVersion = require('../utils/product-info-util').getAddonVersion();
 const productLocations = require(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/locations/product_locations`);
 const fdkconfig = require(`${os.homedir()}/.fdk/addon/addon-${addonVersion}/product_info.json`);
 
-const SUPPORTED_PLATFORMS = ['2.0'];
+const SUPPORTED_PLATFORMS = ['2.0', '2.1'];
 const ICON_HEIGHT = 64;
 const ICON_WIDTH = 64;
 const validationConst = constants.validationContants;
@@ -23,6 +23,9 @@ const validOmniAppProducts = fdkconfig.omni_products;
 function validatePlatform() {
   if (!(_.includes(SUPPORTED_PLATFORMS, manifest.pfVersion))) {
     return `Invalid platform version mentioned in manifest.json - ${manifest.pfVersion}`;
+  }
+  if (manifest.pfVersion === '2.0' && Object.keys(manifest.product||{}).length > 1) {
+    console.log('\x1b[33m[WARN]\x1b[0m Platform version 2.0 will be deprecated shortly.\nPlease update the app manifest to latest version (2.1) to use latest features.\n');
   }
 }
 
@@ -55,29 +58,46 @@ function validateOmniApp() {
 function validateLocation(appType) {
   let prod;
   let invalidLocationMsg = '';
+  let products = manifest.product;
+
   /*
     Skip location validation if purebackend app.
   */
-
-  if (_.includes(appType, 'purebackend')) {
+  if (appType && appType.includes('purebackend')) {
     return;
+  }
+
+  if (manifest.features.includes('omni') &&
+    manifest.features.includes('backend') && manifest.pfVersion !== '2.0') {
+    products = {};
+    for (prod in manifest.product) {
+      if (manifest.product[prod].location || !manifest.product[prod].events) {
+        products[prod] = manifest.product[prod];
+      }
+    }
   }
   /*
     validate the locations mentioned under each product in manifest.json
     if it is not a purebackend app.
   */
-  for (prod in manifest.product) {
-    const manifestLocations = _.keys(manifest.product[prod].location);
+  try {
+    for (prod in products) {
+      const manifestLocations = Object.keys(products[prod].location);
 
-    if (_.isEmpty(manifestLocations)) {
-      return `Missing locations for product: ${prod}`;
-    }
-    const invalidLocations = _.difference(manifestLocations, productLocations[prod].location);
+      if (_.isEmpty(manifestLocations)) {
+        return `Missing locations for product: ${prod}`;
+      }
+      const invalidLocations = _.difference(manifestLocations, productLocations[prod].location);
 
-    if (invalidLocations.length > 0) {
-      invalidLocationMsg += `\n     ${prod} - ${invalidLocations}`;
+      if (invalidLocations.length > 0) {
+        invalidLocationMsg += `\n     ${prod} - ${invalidLocations}`;
+      }
     }
+  } catch (err) {
+    console.log(err);
+    return 'Invalid manifest / folder configuration for app';
   }
+
   if (invalidLocationMsg !== '') {
     return `Invalid location(s) mentioned in manifest.json: ${invalidLocationMsg}`;
   }
@@ -85,10 +105,10 @@ function validateLocation(appType) {
   if (fileUtil.fileExists('./app')) {
     const locationFieldErr = [];
 
-    for (prod in manifest.product) {
-      for (const location in manifest.product[prod].location) {
-        const templateFile = manifest.product[prod].location[location].url;
-        const icon = manifest.product[prod].location[location].icon;
+    for (prod in products) {
+      for (const location in products[prod].location) {
+        const templateFile = products[prod].location[location].url;
+        const icon = products[prod].location[location].icon;
 
         if (_.isUndefined(templateFile) || templateFile === '') {
           locationFieldErr.push(`Url is either not mentioned or empty in ${prod}/${location}`);
@@ -120,12 +140,11 @@ function validateLocation(appType) {
 module.exports = {
   validate(appType) {
     const errMsgs = [];
-    const isNoOfProductMoreThanOne = _.keys(manifest.product).length > 1;
     const productErr = validateProduct();
     let omniError;
     let locationErr;
 
-    if (isNoOfProductMoreThanOne) {
+    if (manifest.features.includes('omni')) {
       omniError = validateOmniApp();
     }
 

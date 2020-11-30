@@ -7,11 +7,6 @@ const validationConst = require('./constants').validationContants;
 const httpUtil = require('../utils/http-util');
 const manifest = require('../manifest');
 
-const MINIMUM_DOWNLOAD_COUNT = 50;
-const REQUEST_TIMEOUT = 3000;
-
-const debuglog = __debug.bind(null, __filename);
-
 function validateDependencies() {
   const err = [];
 
@@ -31,21 +26,6 @@ function validateDependencies() {
       }
       if (!(_.includes(availableVersions, version))) {
         err.push(`Package ${i} does not have version ${manifest.dependencies[i]}.`);
-      }
-      else {
-        try {
-          const downloadCountRequest = syncRequest('GET', `https://api.npmjs.org/downloads/point/last-month/${i}`, {
-            timeout: REQUEST_TIMEOUT
-          });
-          const downloadCount = JSON.parse(downloadCountRequest.body.toString()).downloads;
-
-          if (downloadCount < MINIMUM_DOWNLOAD_COUNT) {
-            err.push(`Package ${i} does not reach the minimum popularity.`);
-          }
-        }
-        catch (err) {
-          debuglog(`Popularity check failed - ${err.stack}`);
-        }
       }
     }
   }

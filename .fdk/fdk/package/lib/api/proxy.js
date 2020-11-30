@@ -110,8 +110,8 @@ function validateUrl(requestURL) {
 }
 
 function fetchOauthConfigs(req) {
-  const oauthCredential = oauth.fetchCredentials(req) || {};
-  const oauthIparams = oauth.fetchOauthIparams();
+  const oauthCredential = oauth.fetchCredentials(req, req.meta.product) || {};
+  const oauthIparams = oauth.fetchOauthIparams(req.meta.product);
 
   return {
     access_token: oauthCredential.access_token,
@@ -121,9 +121,8 @@ function fetchOauthConfigs(req) {
 
 function templatize(req) {
   const reqOptions = req.body.data;
-
   const templates = Object.assign({
-    iparam: configUtil.getValuesForLocalTesting(),
+    iparam: configUtil.getValuesForLocalTesting(req.meta.product),
     oauth_iparams: {}
   }, helper.templateMethods);
 
