@@ -4,6 +4,8 @@ const _ = require('lodash');
 const jQueryDeferred = require('jquery-deferred');
 const request = require('request');
 
+const EntityFactory = require('./base_entity');
+
 const httpUtil = require('../../utils/http-util');
 
 const SUCCESS_STATUS = [
@@ -67,6 +69,10 @@ class DBApi {
 
   delete(key) {
     return makeCall({ dbKey: key, action: 'delete'}, this.product);
+  }
+
+  entity(params) {
+    return EntityFactory(params);
   }
 }
 

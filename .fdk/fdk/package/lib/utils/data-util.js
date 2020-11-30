@@ -3,6 +3,12 @@
 const debuglog = __debug.bind(null, __filename);
 
 const fs = require('fs');
+const path = require('path');
+const process = require('process');
+const { Sequelize } = require('sequelize');
+const Umzug = require('umzug');
+
+const sequelize = require('../instances/sequelize');
 const helper = require('./helper-util');
 const httpUtil = require('./http-util');
 const errorUtil = require('./error-util');
@@ -18,11 +24,49 @@ const INVALID_PATH = 'One or more paths in the attributes are invalid or overlap
 const INVALID_REMOVE_KEY = 'The specified key for remove operation does not exist in the data store';
 const ITEM_SIZE_EXCEPTION = 'Item size exceeded the maximum limit of 8 KB';
 
+const umzug = new Umzug({
+  migrations: {
+    path: path.join(__dirname+ '/../migrations'),
+    params: [
+      sequelize.getQueryInterface(),
+      Sequelize
+    ]
+  },
+  logging: false,
+  storage: 'sequelize',
+  storageOptions: {
+    sequelize
+  }
+});
+
+async function setup() {
+  await umzug.up();
+}
+
+async function teardown() {
+  await umzug.down({ to: 0 });
+}
+
 class DataStore {
   constructor(args = {}) {
     this.file = args.file || 'localstore';
     this.location = args.location;
     this.scope = args.scope;
+
+    this.ensureStore();
+  }
+
+  ensureStore() {
+    const folderPath = this.getDataStoreFolder();
+    const filePath = this.getDataStoreFile();
+
+    if (!fs.existsSync(folderPath)) {
+      fs.mkdirSync(folderPath);
+    }
+
+    if (!fs.existsSync(filePath)) {
+      fs.writeFileSync(filePath, '{}');
+    }
   }
 
   getDataStoreFolder() {
@@ -257,5 +301,9 @@ class DataStore {
 }
 
 module.exports = {
-  DataStore
+  DataStore,
+  entityDB: {
+    setup,
+    teardown
+  }
 };

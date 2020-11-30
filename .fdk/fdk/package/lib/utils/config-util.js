@@ -16,7 +16,7 @@ const iparamsJs = 'iparams.js';
 const oauthConfigFile = 'oauth_config.json';
 const validRoutes = {
   'install': ['smi', 'proxy', 'oauth'],
-  'configure': ['db', 'proxy', 'oauth', 'smi']
+  'configure': ['db', 'proxy', 'oauth', 'smi', 'entity', 'record']
 };
 
 

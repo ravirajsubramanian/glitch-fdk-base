@@ -167,7 +167,7 @@ module.exports = {
 
     debuglog(`Making proxy call with options as ${JSON.stringify(reqOptions)}`);
 
-    return request(validatedOpts, function (error, response, responseBody) {
+    request(validatedOpts, function (error, response, responseBody) {
       debuglog(`Proxy came back with error as ${error && error.message}, body as ${(JSON.stringify(responseBody) || '').slice(0, TRIM_LENGTH)}`);
 
       if (error) {
